@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://fondo_ejemplo.png" type="Texture" id=1]
 [ext_resource path="res://BAILARINA GIRO/10 GIRO.png" type="Texture" id=2]
@@ -22,6 +22,9 @@
 [ext_resource path="res://textos.gd" type="Script" id=20]
 [ext_resource path="res://sonidos/musica_de_fondo.wav" type="AudioStream" id=21]
 [ext_resource path="res://Main.gd" type="Script" id=22]
+[ext_resource path="res://Object.tscn" type="PackedScene" id=23]
+[ext_resource path="res://Object2.tscn" type="PackedScene" id=24]
+[ext_resource path="res://ObjectController.gd" type="Script" id=25]
 
 [sub_resource type="SpriteFrames" id=1]
 animations = [ {
@@ -32,7 +35,7 @@ animations = [ {
 } ]
 
 [sub_resource type="RectangleShape2D" id=4]
-extents = Vector2( 44.5, 81 )
+extents = Vector2( 18, 49 )
 
 [sub_resource type="SpriteFrames" id=5]
 animations = [ {
@@ -41,6 +44,9 @@ animations = [ {
 "name": "default",
 "speed": 12.0
 } ]
+
+[sub_resource type="RectangleShape2D" id=8]
+extents = Vector2( 46, 84.5 )
 
 [sub_resource type="DynamicFont" id=7]
 size = 30
@@ -54,6 +60,12 @@ font_data = ExtResource( 10 )
 pause_mode = 2
 script = ExtResource( 22 )
 
+[node name="musica_de_fondo" type="AudioStreamPlayer" parent="."]
+pause_mode = 1
+stream = ExtResource( 21 )
+volume_db = 3.733
+autoplay = true
+
 [node name="Fondo" type="AnimatedSprite" parent="."]
 pause_mode = 1
 position = Vector2( 640, 359 )
@@ -63,7 +75,7 @@ playing = true
 
 [node name="personaje" type="KinematicBody2D" parent="."]
 pause_mode = 1
-position = Vector2( 662, 449 )
+position = Vector2( 661, 443 )
 script = ExtResource( 3 )
 __meta__ = {
 "_edit_group_": true
@@ -71,15 +83,21 @@ __meta__ = {
 speed = 250
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="personaje"]
-position = Vector2( -1, -18 )
+position = Vector2( -7, -17 )
 shape = SubResource( 4 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="personaje"]
 position = Vector2( 2, -18 )
 scale = Vector2( 0.273443, 0.335836 )
 frames = SubResource( 5 )
-frame = 11
+frame = 4
 playing = true
+
+[node name="Area2D" type="Area2D" parent="personaje"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="personaje/Area2D"]
+position = Vector2( -1, -20.5 )
+shape = SubResource( 8 )
 
 [node name="Interfaz" type="CanvasLayer" parent="."]
 pause_mode = 2
@@ -151,6 +169,7 @@ margin_bottom = 59.0
 text = "Créditos"
 
 [node name="creditos" type="CanvasLayer" parent="Interfaz"]
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Interfaz/creditos"]
 anchor_right = 1.0
@@ -190,13 +209,34 @@ Florencia Paula Cardinali "
 align = 1
 script = ExtResource( 20 )
 
-[node name="musica_de_fondo" type="AudioStreamPlayer" parent="."]
+[node name="Objects" type="Node2D" parent="."]
 pause_mode = 1
-stream = ExtResource( 21 )
-autoplay = true
+light_mask = 0
+position = Vector2( 566, 15 )
+z_as_relative = false
+script = ExtResource( 25 )
+Object1 = ExtResource( 23 )
+Object2 = ExtResource( 24 )
 
+[node name="ObjPath" type="Path2D" parent="Objects"]
+position = Vector2( 223.554, -65 )
+scale = Vector2( 1.26538, 1 )
+
+[node name="ObjSpawnLocation" type="PathFollow2D" parent="Objects/ObjPath"]
+position = Vector2( -36, 8 )
+rotation = 0.0823678
+cubic_interp = false
+
+[node name="ObjectTimer" type="Timer" parent="."]
+pause_mode = 1
+wait_time = 0.96
+autostart = true
+
+[connection signal="finished" from="musica_de_fondo" to="." method="_on_musica_de_fondo_finished"]
+[connection signal="body_entered" from="personaje/Area2D" to="personaje" method="_on_Area2D_body_entered"]
 [connection signal="pressed" from="Interfaz/boton_pausa_main" to="Interfaz" method="_on_boton_pausa_main_pressed"]
 [connection signal="pressed" from="Interfaz/menu_pausa/boton_pausa_salir" to="Interfaz" method="_on_boton_pausa_salir_pressed"]
 [connection signal="pressed" from="Interfaz/menu_pausa/boton_pausa_volver" to="Interfaz" method="_on_boton_pausa_volver_pressed"]
 [connection signal="pressed" from="Interfaz/menu_pausa/boton_pausa_creditos" to="Interfaz" method="_on_boton_pausa_creditos_pressed"]
 [connection signal="pressed" from="Interfaz/creditos/boton_vovler_creditos" to="Interfaz" method="_on_boton_vovler_creditos_pressed"]
+[connection signal="timeout" from="ObjectTimer" to="Objects" method="_on_ObjectTimer_timeout"]
